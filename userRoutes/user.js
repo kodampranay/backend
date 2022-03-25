@@ -13,6 +13,7 @@ const router = express.Router();
 
 
 
+
 //REGISTERING WITH NUMBER
 router.post("/api/register", async (req, res) => {
   try {
@@ -146,18 +147,30 @@ function generating_AuthKey(id) {
 
 router.get("/api/auth", async (req, res) => {
   try {
+
+    
     const { token } = req.headers;
     const { authkey } = JSON.parse(token);
-    const tokenvalid = await jwt.verify(authkey, process.env.privatekey);
-
+    const tokenvalid =  jwt.verify(authkey, process.env.privatekey);
+    // console.log(tokenvalid)
+    
     if (tokenvalid.id) {
       //CHEKING TOKEN IS EXISTED OR NOT
 
-      const existtoken = await userModel.find({
-        id: tokenvalid.id,
-        authkey: token,
-      });
 
+      const token_e=
+      await userModel.findOne({
+        
+        id: tokenvalid.id,
+        authkey
+      });
+      // console.log('token-e',token_e)
+      const existtoken = await userModel.findOne({
+        
+        id: tokenvalid.id,
+        authkey
+      });
+      // console.log('token',existtoken);
       if (existtoken) {
         return res
           .status(200)
@@ -379,7 +392,7 @@ router.get('/api/:sid/send',authentication,async(req,res)=>
     const request=await userModel.findByIdAndUpdate(exist_number.id,{$push:{requests:user_id}})
     // console.log(requests)
 
-      res.status(200).send({status:1,message:'send request successfully'})
+      res.status(200).send({status:1,message:'send request successfully',id:exist_number.id})
   }
   catch(err)
   {
